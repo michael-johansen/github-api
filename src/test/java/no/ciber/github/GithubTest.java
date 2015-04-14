@@ -1,5 +1,9 @@
 package no.ciber.github;
 
+import no.ciber.github.model.Repository;
+import no.ciber.github.model.SearchRequest;
+import no.ciber.github.model.User;
+import no.ciber.github.model.UserSearchResult;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,5 +40,16 @@ public class GitHubTest {
 
         assertThat(repository, is(notNullValue()));
         assertThat(repository.getName(), is("github-api"));
+    }
+
+    @Test
+    public void canSearchForUsers() throws Exception {
+        UserSearchResult result = gitHub.searchForUser(new SearchRequest("michael", 1, 10));
+
+        result.getUsers().stream().map(User::getScore).reduce((left, right) -> {
+            if (left < right) throw new IllegalStateException("Not sorted");
+            return right;
+        });
+        System.out.println("sorted");
     }
 }
