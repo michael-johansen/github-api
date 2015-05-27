@@ -1,6 +1,7 @@
 package no.ciber.github;
 
 import com.google.gson.Gson;
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
@@ -51,9 +52,17 @@ public class GitHub {
         }
         try {
             logger.info("Fetching: "+ request.getUrl());
-            return gson.fromJson(request.asString().getBody(), returnClass);
+            HttpResponse<String> stringHttpResponse = request.asString();
+            logHeaders(stringHttpResponse, "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset");
+            return gson.fromJson(stringHttpResponse.getBody(), returnClass);
         } catch (UnirestException e) {
             throw new GitHubApiException(e);
+        }
+    }
+
+    private void logHeaders(HttpResponse<String> stringHttpResponse, String... headers) {
+        for (String header : headers) {
+            logger.debug(String.format("%s: %s", header, stringHttpResponse.getHeaders().getFirst(header.toLowerCase())));
         }
     }
 
